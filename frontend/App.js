@@ -12,7 +12,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 import HTTPRequest from "./src/services/HttpRequest";
-import labels from "./resources/labels.json";
+import labels from "./src//resources/labels.json";
 
 const options = {
   mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -23,8 +23,8 @@ export default function App() {
   let windowWidth = Dimensions.get("window").width;
   let windowHeight = Dimensions.get("window").height;
 
-  const [pickedImage, setPickedImage] = useState();
-  const [response, setResponse] = useState({ message: "", traffic_id: "" });
+  const [pickedImage, setPickedImage] = useState(null);
+  const [response, setResponse] = useState(null);
 
   const requestMediaAccess = async () => {
     if (Platform.OS != "web") {
@@ -66,6 +66,10 @@ export default function App() {
     }
   }, [pickedImage]);
 
+  const getLabelByID = (id) => {
+    return labels.find((item) => item._id == id);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="default" />
@@ -77,9 +81,16 @@ export default function App() {
         )}
       </View>
       <View>
-        <Text>
-          {JSON.stringify(response)} / {}
-        </Text>
+        {response ? (
+          <>
+            <Text>Notice: {getLabelByID(response.traffic_id).name}</Text>
+            <Text>
+              Description: {getLabelByID(response.traffic_id).description}
+            </Text>
+          </>
+        ) : (
+          <Text>Please choosen image or take a photo</Text>
+        )}
       </View>
       <View style={styles.pickImageButton}>
         <Button onPress={pickImage} title="Image Picker" />
