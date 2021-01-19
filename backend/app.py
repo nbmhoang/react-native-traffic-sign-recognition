@@ -20,10 +20,8 @@ def allowed_file(filename):
   extension = filename.rsplit('.', 1)[1].lower()
   return '.' in filename and extension in ALLOWED_EXTENSIONS
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['POST'])
 def home():
-    if request.method == 'GET':
-        return send_file('tfjs/model.json')
     if 'img' not in request.files:
         return jsonify({
             'message': 'Missing file'
@@ -55,3 +53,7 @@ def home():
       return jsonify({
         'message': 'File doesnt support'
       }), 400
+
+@app.route('/model/<string:filename>')
+def get_file(filename):
+    return send_file('tfjs/{}'.format(filename))
