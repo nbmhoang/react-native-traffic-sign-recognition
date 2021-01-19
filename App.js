@@ -10,10 +10,12 @@ import {
   Dimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+import HTTPRequest from "./src/services/HttpRequest";
+import labels from "./resources/labels.json";
 
 const options = {
   mediaTypes: ImagePicker.MediaTypeOptions.All,
-  allowsEditing: true,
   quality: 1,
 };
 
@@ -22,6 +24,7 @@ export default function App() {
   let windowHeight = Dimensions.get("window").height;
 
   const [pickedImage, setPickedImage] = useState();
+  const [response, setResponse] = useState({ message: "", traffic_id: "" });
 
   const requestMediaAccess = async () => {
     if (Platform.OS != "web") {
@@ -40,22 +43,47 @@ export default function App() {
     setPickedImage(result);
   };
 
+  const takeImage = async () => {
+    let result = await ImagePicker.launchCameraAsync();
+    setPickedImage(result);
+  };
+
   useEffect(() => {
     requestMediaAccess();
   }, []);
 
+  useEffect(() => {
+    if (pickedImage) {
+      const formData = new FormData();
+      formData.append("img", {
+        uri: pickedImage.uri,
+        name: "upload.png",
+        type: "image/png",
+      });
+      HTTPRequest.postImage("http://192.168.1.9:5000", formData).then((res) => {
+        setResponse(res.data);
+      });
+    }
+  }, [pickedImage]);
+
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
+      <StatusBar style="default" />
       <View
-        style={{ width: windowWidth, height: windowHeight / 3, padding: 10 }}
+        style={{ width: windowWidth, height: windowHeight * 0.4, padding: 10 }}
       >
         {pickedImage && (
           <Image source={{ uri: pickedImage.uri }} style={styles.image} />
         )}
       </View>
+      <View>
+        <Text>
+          {JSON.stringify(response)} / {}
+        </Text>
+      </View>
       <View style={styles.pickImageButton}>
         <Button onPress={pickImage} title="Image Picker" />
+        <Button onPress={takeImage} title="Take a Photo" />
       </View>
     </View>
   );
@@ -67,12 +95,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    paddingTop: Constants.statusBarHeight,
   },
   pickImageButton: {
     flex: 1,
-    justifyContent: "flex-end",
+    flexDirection: "row",
     marginBottom: 36,
-    alignItems: "center",
+    alignItems: "flex-end",
+    width: "100%",
+    justifyContent: "space-around",
   },
   image: {
     padding: 1,
