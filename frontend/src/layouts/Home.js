@@ -42,7 +42,6 @@ export default function Home() {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync(options);
-    console.log(result);
     setPickedImage(result);
   };
 
@@ -82,8 +81,7 @@ export default function Home() {
         name: "upload.png",
         type: "image/png",
       });
-      console.log("POSTING...");
-      HTTPRequest.postImage("http://192.168.1.6:5000", formData).then((res) => {
+      HTTPRequest.postImage("http://192.168.1.7:5000", formData).then((res) => {
         setResponse(res.data);
         const itemLabel = getLabelByID(res.data.traffic_id);
         const saveObject = {
@@ -93,9 +91,7 @@ export default function Home() {
           name: itemLabel.name,
           description: itemLabel.description,
         };
-        console.log("Save object: " + JSON.stringify(saveObject));
         storeData(saveObject);
-        console.log("EXEC RESULT ENDED...");
       });
     }
   }, [pickedImage]);

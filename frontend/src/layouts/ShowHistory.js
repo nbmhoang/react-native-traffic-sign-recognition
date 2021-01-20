@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { View, StyleSheet, ScrollView, SafeAreaView, Text } from "react-native";
 import HistoryItem from "../components/HistoryItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { useIsFocused } from "@react-navigation/native";
+
 
 const STORE_HISTORY_KEY = "predictHistory";
 
@@ -17,12 +18,9 @@ function ShowHistory({ navigation }) {
 
   const getDataFromStore = async () => {
     try {
-      console.log("Begin get async storage");
       await AsyncStorage.getItem(STORE_HISTORY_KEY, (err, result) => {
-        console.log("Store history key: " + result + " | Error: " + err);
         setStoreHistories(JSON.parse(result));
       });
-      console.log("END get async storage");
     } catch (e) {
       console.log("Get Storage history error: " + e);
     }
@@ -31,7 +29,7 @@ function ShowHistory({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {storeHistories.map((item, index) => {
+        {storeHistories ? storeHistories.map((item, index) => {
           return (
             <HistoryItem
               sourceURI={item.uri}
@@ -41,7 +39,7 @@ function ShowHistory({ navigation }) {
               key={index}
             />
           );
-        })}
+        }) : <Text>Danh sách trống</Text>}
       </ScrollView>
     </SafeAreaView>
   );
