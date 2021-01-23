@@ -28,6 +28,7 @@ export default function Home() {
   let windowHeight = Dimensions.get("window").height;
 
   const [pickedImage, setPickedImage] = useState(null);
+  const [error, setError] = useState('');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -98,7 +99,10 @@ export default function Home() {
           };
           storeData(saveObject);
         }
-      );
+      ).catch(() => {
+        setLoading(false);
+        setError('An error has occured when uploading to server. Please try again!')
+      });
     }
   }, [pickedImage]);
 
@@ -115,20 +119,23 @@ export default function Home() {
       <View>
         {loading ? (
           <ActivityIndicator color="#346beb" size="large" />
-        ) : response ? (
-          <>
-            <Text>Notice: {getLabelByID(response.traffic_id).name}</Text>
-            <Text>
-              Description: {getLabelByID(response.traffic_id).description}
-            </Text>
-          </>
+        ) : (response || error) ? (
+          error ? <><Text style={{color: '#ff0000'}}>{error}</Text></> : 
+            <>
+              <Text style={{fontSize: 18, marginTop: 20, marginBottom: 20}}>
+                <Text style={{fontWeight: 'bold'}}>Tên biển báo: </Text>{getLabelByID(response.traffic_id).name}
+              </Text>
+              <Text style={{fontSize: 18}}>
+                <Text style={{fontWeight: 'bold'}}>Giải thích: </Text>{getLabelByID(response.traffic_id).description}
+              </Text>
+            </>
         ) : (
           <Text>Please choosen image or take a photo</Text>
         )}
       </View>
       <View style={styles.pickImageButton}>
-        <Button onPress={pickImage} title="Image Picker" />
-        <Button onPress={takeImage} title="Take a Photo" />
+        <Button onPress={pickImage} title="THƯ VIỆN" />
+        <Button onPress={takeImage} title="CHỤP ẢNH" />
       </View>
     </View>
   );
