@@ -8,6 +8,7 @@ import {
   Button,
   Image,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
@@ -28,6 +29,7 @@ export default function Home() {
 
   const [pickedImage, setPickedImage] = useState(null);
   const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const requestMediaAccess = async () => {
     if (Platform.OS != "web") {
@@ -75,24 +77,28 @@ export default function Home() {
 
   useEffect(() => {
     if (pickedImage) {
+      setLoading(true);
       const formData = new FormData();
       formData.append("img", {
         uri: pickedImage.uri,
         name: "upload.png",
         type: "image/png",
       });
-      HTTPRequest.postImage("http://192.168.1.7:5000", formData).then((res) => {
-        setResponse(res.data);
-        const itemLabel = getLabelByID(res.data.traffic_id);
-        const saveObject = {
-          ...res.data,
-          uri: pickedImage.uri,
-          time: new Date(Date.now()).toUTCString(),
-          name: itemLabel.name,
-          description: itemLabel.description,
-        };
-        storeData(saveObject);
-      });
+      HTTPRequest.postImage("http://192.168.43.152:5000", formData).then(
+        (res) => {
+          setLoading(false);
+          setResponse(res.data);
+          const itemLabel = getLabelByID(res.data.traffic_id);
+          const saveObject = {
+            ...res.data,
+            uri: pickedImage.uri,
+            time: new Date(Date.now()).toUTCString(),
+            name: itemLabel.name,
+            description: itemLabel.description,
+          };
+          storeData(saveObject);
+        }
+      );
     }
   }, [pickedImage]);
 
@@ -107,7 +113,9 @@ export default function Home() {
         )}
       </View>
       <View>
-        {response ? (
+        {loading ? (
+          <ActivityIndicator color="#346beb" size="large" />
+        ) : response ? (
           <>
             <Text>Notice: {getLabelByID(response.traffic_id).name}</Text>
             <Text>
